@@ -3,11 +3,18 @@
 // import  {getAuth, createUserWithEmailAndPassword} from "firebase/auth";
 
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-import {getDatabase, set, ref, update} from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
+import {
+    getDatabase,
+    set,
+    ref,
+    update
+} from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 import {
     getAuth,
     createUserWithEmailAndPassword,
-    signInWithEmailAndPassword
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut
 } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
 
 
@@ -42,7 +49,7 @@ signUp.addEventListener("click", (e) => {
                 email: email
             };
             set(ref(database, "users/" + user.uid), userData).then(() => {
-                console.log("success");
+                console.log("user created");
             }).catch((error) => {
                 console.log(error.message);
             });
@@ -66,13 +73,42 @@ signIn.addEventListener("click", (e) => {
                 last_login: date,
             })
             console.log('logged in');
-            window.location.href = 'http://google.com';
-        })
-        .catch((error) => {
+            window.location.href = '#';
+        }).catch((error) => {
             const errorCode = error.code;
             const errorMessage = error.message;
             console.log(errorCode, errorMessage)
+        }
+    );
+});
+
+const user = auth.currentUser;
+onAuthStateChanged(auth, (user) => {
+    //TODO Handle user login state
+    let userCheck = document.getElementById('userCheck');
+    if (user) {
+        const uid = user.uid;
+        signIn.style.display = 'none';
+        userCheck.style.display = 'unset';
+
+        userCheck.addEventListener("click", () => {
+            console.log("Current user:", user.email)
         });
+    } else {
+        // User is signed out
+        console.log("user logged out");
+        signIn.style.display = 'unset';
+        userCheck.style.display = 'none';
+    }
+
+});
+
+let signout = document.getElementById('signOut');
+signout.addEventListener("click", () => {
+    signOut(auth).then(() => {
+        // Sign-out successful.
+        console.log('logged out');
+    }).catch((error) => {
+        console.log(error.message)
+    });
 })
-
-
